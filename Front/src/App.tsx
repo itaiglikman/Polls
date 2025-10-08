@@ -5,10 +5,7 @@ function App() {
    
     return (
         <div className='App'>
-
-            {/* <Routing /> */}
-            hello
-
+            <Routing />
         </div >
     )
 }
