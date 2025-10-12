@@ -1,26 +1,32 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
+const username = process.env.DB_USERNAME || 'root';
+const password = process.env.DB_PASSWORD || '';
+const database = process.env.DB_NAME || 'polls_db';
+const host = process.env.DB_HOST || 'localhost';
+const dialect = 'mysql';
+
 module.exports = {
     "development": {
-        "username": process.env.DB_USER,
-        "password": process.env.DB_PASS,
-        "database": process.env.DB_NAME,
-        "host": process.env.DB_HOST,
-        "dialect": "mysql"
+        "username": username,
+        "password": password,
+        "database": database,
+        "host": host,
+        "dialect": dialect,
     },
     "test": {
-        "username": process.env.DB_USER,
-        "password": process.env.DB_PASS,
-        "database": process.env.DB_NAME,
-        "host": process.env.DB_HOST,
-        "dialect": "mysql"
+        "username": username,
+        "password": password,
+        "database": database,
+        "host": host,
+        "dialect": dialect,
     },
     "production": {
-        "username": process.env.DB_USER,
-        "password": process.env.DB_PASS,
-        "database": process.env.DB_NAME,
-        "host": process.env.DB_HOST,
-        "dialect": "mysql"
+        "username": username,
+        "password": password,
+        "database": database,
+        "host": host,
+        "dialect": dialect,
     }
 }
