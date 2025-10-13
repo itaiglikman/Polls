@@ -1,14 +1,15 @@
 import cors from "cors";
+import dotenv from 'dotenv';
 import express from "express";
 import expressRateLimit from "express-rate-limit";
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
+import { Sequelize } from "sequelize";
 import catchAll from "./src/middlewares/catch-all";
 import routeNotFound from './src/middlewares/routeNotFound';
-import { Sequelize } from "sequelize";
+import choicesRouter from './src/routes/choicesRouter';
+import votesRouter from './src/routes/votesRouter';
+import pollsRouter from './src/routes/pollsRouter';
 
-// Load environment variables
+
 dotenv.config();
 
 const app = express();
@@ -29,7 +30,11 @@ app.use(expressRateLimit({
 app.use(express.json());
 app.use(cors());
 
-app.use(routeNotFound)
+app.use('/api/polls', pollsRouter);
+app.use('/api/choices', choicesRouter);
+app.use('/api/votes', votesRouter);
+
+app.use(routeNotFound);
 
 app.use(catchAll);
 
