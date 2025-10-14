@@ -3,57 +3,72 @@ import { useForm } from '@mantine/form';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import classes from './CreatePoll.module.css';
-
-export function validateCreator(value: string) {
-    if (!value) return ('Creator is required');
-    if (value.trim().length < 2) return ('Creator must be at least 2 chars')
-    return null;
-}
-export function validateTitle(value: string) {
-    if (!value) return ('title is required');
-    if (value.trim().length < 4) return ('title must be at least 4 chars')
-    return null;
-}
-
-export function validateChoice(value: string) {
-    if (!value) return ('choice is required');
-    if (value.trim().length < 2) return ('choice must be at least 2 chars')
-    return null;
-}
+import formUtils from '../../utils/formUtils';
+import pollsService from '../../services/pollsService';
+import notifyService from '../../services/NotifyService';
 
 export function CreatePoll() {
 
     const [isLoading, setIsLoading] = useState(false);
-    const [choicesCount, setChoicesCount] = useState<number>(2)
+
     const navigate = useNavigate();
 
     const form = useForm({
         mode: 'uncontrolled',
-        initialValues: { creator: '', title: '', choice: '' },
+        initialValues: { creator: '', title: '', choices: ['', ''] },
         validate: {
-            creator: (value) => validateCreator(value),
-            title: (value) => validateTitle(value),
-            choice: (value) => validateChoice(value)
-        },
+            creator: (value) => formUtils.validateCreator(value),
+            title: (value) => formUtils.validateTitle(value),
+            // validate choices on submit
+        }
     });
 
-    async function handleSubmit(values: { title: string; choice: string }) {
+    async function handleSubmit(values: { creator: string, title: string; choices: string[] }) {
         try {
             form.clearErrors();
-            if (form.validate().hasErrors) return;
+            const validation = form.validate();
+            if (validation.hasErrors) return;
+
+            // remove empty choices
+            const cleanChoices = values.choices
+                .map(c => c.trim())
+                .filter(c => c.length > 0);
+
+            const choicesError = formUtils.validateChoices(cleanChoices);
+            if (choicesError) {
+                form.setErrors({ choices: choicesError });
+                return;
+            }
+
+            const pollData = {
+                creator: values.creator,
+                title: values.title,
+                choices: cleanChoices
+            };
+
+            console.log('Poll data to submit:', pollData);
 
             setIsLoading(true);
 
+            await pollsService.createPoll(pollData);
+            
+            notifyService.success('Poll created successfully!')
+            navigate('/');
             // Auth logic
             // const data = await loginUser(values.title, values.choice);
-            navigate('/');
-
+            
         } catch (error: any) {
             form.setErrors({ form: error.message });
-            console.error('Error logging in: ', error);
+            console.error('Error creating poll:', error);
         } finally {
             setIsLoading(false);
         }
+    }
+
+    function addChoice() {
+        const currentChoices = form.values.choices || [];
+        if (currentChoices.length < 8)
+            form.setFieldValue('choices', [...currentChoices, '']);
     }
 
     return (
@@ -86,21 +101,27 @@ export function CreatePoll() {
                         {...form.getInputProps('title')}
                         onBlur={() => form.validateField('title')}
                     />
-                    {Array.from({ length: choicesCount }, (_, i) => (
+                    {(form.values.choices || []).map((_, i) => (
                         <TextInput
                             label={`option ${i + 1}`}
                             type='text'
-                            withAsterisk
+                            withAsterisk={i < 2}
                             mt="md"
                             radius="md"
-                            key={form.key(`choice${i}`)}
-                            {...form.getInputProps(`choice${i}`)}
-                            onBlur={() => form.validateField(`choice`)}
+                            key={form.key(`choices.${i}`)}
+                            {...form.getInputProps(`choices.${i}`)}
                         />
                     ))}
-                    <Button onClick={() => setChoicesCount(choicesCount + 1)} disabled={choicesCount >= 8}>
+                    <Button
+                        onClick={() => addChoice()}
+                        disabled={(form.values.choices?.length || 0) >= 8}>
                         ➕ add option
                     </Button>
+                    {form.errors.choices && (
+                        <Text c="red" size="sm" mt="sm">
+                            {form.errors.choices}
+                        </Text>
+                    )}
                     {form.errors.form && (
                         <Text c="red" size="sm" mt="sm">
                             {form.errors.form}
@@ -112,7 +133,6 @@ export function CreatePoll() {
                         fullWidth
                         mt="xl"
                         radius="md"
-                        className={classes.loginButton}
                         onClick={() => form.clearErrors()}
                     >
                         Create
