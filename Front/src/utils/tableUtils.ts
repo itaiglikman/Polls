@@ -1,5 +1,5 @@
 import { keys } from "@mantine/core";
-import type { DisplayPoll } from "./types";
+import type { DisplayPoll, FullPoll } from "./types";
 
 function filterData(data: DisplayPoll[], search: string) {
     const query = search.toLowerCase().trim();
@@ -29,4 +29,19 @@ export function sortData(
         }),
         payload.search
     );
+}
+
+export function addVoteToPoll(poll: FullPoll | null, selectChoiceId: number): FullPoll | null {
+    if (!poll) return null;
+    const selectIndex = poll.choices.findIndex(c => c.id === selectChoiceId);
+    if (selectIndex !== undefined && selectIndex !== -1) {
+        // Deep copy the poll object and choices array
+        const dupPoll = { ...poll, choices: [...poll.choices] };
+        dupPoll.choices[selectIndex] = {
+            ...dupPoll.choices[selectIndex],
+            voteCount: dupPoll.choices[selectIndex].voteCount + 1
+        };
+        return dupPoll;
+    }
+    return poll;
 }
