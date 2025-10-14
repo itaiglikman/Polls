@@ -1,20 +1,23 @@
-import { ScrollArea, Table, Text, TextInput } from '@mantine/core';
+import { Button, Group, ScrollArea, Table, Text, TextInput } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import { getPolls } from '../../services/pollsService';
+import pollsService from '../../services/pollsService';
 import { sortData } from "../../utils/tableUtils";
 import type { DisplayPoll } from '../../utils/types';
 import "./PollsTable.module.css";
 import { Th } from './Th';
+import { useNavigate } from 'react-router';
+import notifyService from '../../services/NotifyService';
 
 export function PollsTable() {
     const [search, setSearch] = useState('');
     const [sortedPolls, setSortedPolls] = useState<DisplayPoll[]>([]);
     const [sortBy, setSortBy] = useState<keyof DisplayPoll | null>(null);
     const [reverseSortDirection, setReverseSortDirection] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        getPolls()
+        pollsService.getPolls()
             .then(pollsData => setSortedPolls(pollsData))
             .catch(error => console.error('Error fetching polls:', error));
     }, [])
@@ -33,11 +36,26 @@ export function PollsTable() {
     };
 
     const rows = sortedPolls.map((row) => (
-        <Table.Tr key={row.id}>
-            <Table.Td>{row.id}</Table.Td>
+        <Table.Tr
+            key={row.id}
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate('/polls/poll-page/' + row.id)}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f3f5'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+        >
             <Table.Td>{row.title}</Table.Td>
             <Table.Td>{row.creator}</Table.Td>
-            <Table.Td>{row.link}</Table.Td>
+            <Table.Td>
+            <Group>
+                <Button onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(row.link!);
+                notifyService.success('Link was copied to your clipboard!')
+                }}>
+                Share
+                </Button>
+            </Group>
+            </Table.Td>
         </Table.Tr>
     ));
 
@@ -51,15 +69,8 @@ export function PollsTable() {
                 onChange={handleSearchChange}
             />
             <Table horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed">
-                <Table.Tbody>
+                <Table.Thead>
                     <Table.Tr>
-                        <Th
-                            sorted={sortBy === 'id'}
-                            reversed={reverseSortDirection}
-                            onSort={() => setSorting('id')}
-                        >
-                            id
-                        </Th>
                         <Th
                             sorted={sortBy === 'title'}
                             reversed={reverseSortDirection}
@@ -82,7 +93,7 @@ export function PollsTable() {
                             link
                         </Th>
                     </Table.Tr>
-                </Table.Tbody>
+                </Table.Thead>
                 <Table.Tbody>
                     {rows.length > 0 ? (
                         rows

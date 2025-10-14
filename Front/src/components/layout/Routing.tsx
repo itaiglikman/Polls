@@ -7,13 +7,12 @@ import { PollPage } from "../PollPageArea/PollPage";
 
 export function Routing() {
     return (
-        <Box flex={1}>
+        <Box flex={1} m={20}>
             <Routes>
                 <Route path="/" element={<Home/>}/>
                 <Route path="/create" element={<CreatePoll/>}/>
                 {/* poll page */}
-                {/* <Route path="/polls/:id" element={<PollPage id={}/>}/> */}
-                <Route path="/polls" element={<PollPage/>}/>
+                <Route path="/polls/poll-page/:pollId" element={<PollPage/>}/>
                 {/* 404 */}
                 <Route path="*" element={<PageNotFound />} />
             </Routes>

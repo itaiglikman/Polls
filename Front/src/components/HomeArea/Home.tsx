@@ -8,8 +8,8 @@ export function Home() {
 
     return (
         <div className="Home">
+            <Button onClick={() => navigate('/create')} mb={20}>Create New Poll</Button>
             <PollsTable/>
-            <Button onClick={() => navigate('/create')}>Create New Poll</Button>
         </div>
     );
 }

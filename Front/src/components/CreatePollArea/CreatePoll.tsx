@@ -1,8 +1,7 @@
 import { Button, Container, Paper, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
-import classes from './CreatePoll.module.css';
+import { useNavigate } from 'react-router';
 import formUtils from '../../utils/formUtils';
 import pollsService from '../../services/pollsService';
 import notifyService from '../../services/NotifyService';
@@ -10,7 +9,6 @@ import notifyService from '../../services/NotifyService';
 export function CreatePoll() {
 
     const [isLoading, setIsLoading] = useState(false);
-
     const navigate = useNavigate();
 
     const form = useForm({
@@ -46,20 +44,13 @@ export function CreatePoll() {
                 choices: cleanChoices
             };
 
-            console.log('Poll data to submit:', pollData);
-
             setIsLoading(true);
-
-            await pollsService.createPoll(pollData);
-            
+            await pollsService.createPoll(pollData);            
             notifyService.success('Poll created successfully!')
             navigate('/');
-            // Auth logic
-            // const data = await loginUser(values.title, values.choice);
             
         } catch (error: any) {
             form.setErrors({ form: error.message });
-            console.error('Error creating poll:', error);
         } finally {
             setIsLoading(false);
         }
@@ -73,12 +64,7 @@ export function CreatePoll() {
 
     return (
         <Container size={420} my={40}>
-            <Title ta="center" className={classes.title}>
-                Welcome back!
-            </Title>
-            <Text className={classes.subtitle}>
-                Do not have an account yet? <Link to={'/register'}>Create account</Link>
-            </Text>
+             <Button onClick={() => navigate('/')} mb={20}> Home</Button>
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
                     <TextInput
