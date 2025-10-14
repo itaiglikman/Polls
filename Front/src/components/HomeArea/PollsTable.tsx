@@ -1,66 +1,40 @@
 import { ScrollArea, Table, Text, TextInput } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getPolls } from '../../services/pollsService';
 import { sortData } from "../../utils/tableUtils";
+import type { DisplayPoll } from '../../utils/types';
 import "./PollsTable.module.css";
 import { Th } from './Th';
 
-export interface RowData {
-    title: string;
-    creator: string;
-    link: string;
-}
-
-const data = [
-    {
-        title: 'Athena Weissnat',
-        creator: 'Little - Rippin',
-        link: 'Elouise.Prohaska@yahoo.com',
-    },
-    {
-        title: 'Deangelo Runolfsson',
-        creator: 'Greenfelder - Krajcik',
-        link: 'Kadin_Trantow87@yahoo.com',
-    },
-    {
-        title: 'Danny Carter',
-        creator: 'Kohler and Sons',
-        link: 'Marina3@hotmail.com',
-    },
-    {
-        title: 'Trace Tremblay PhD',
-        creator: 'Crona, Aufderhar and Senger',
-        link: 'Antonina.Pouros@yahoo.com',
-    },
-    {
-        title: 'Derek Dibbert',
-        creator: 'Gottlieb LLC',
-        link: 'Abagail29@hotmail.com',
-    },
-] ;
-// ] as RowData[];
-
 export function PollsTable() {
     const [search, setSearch] = useState('');
-    const [sortedData, setSortedData] = useState(data);
-    const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
+    const [sortedPolls, setSortedPolls] = useState<DisplayPoll[]>([]);
+    const [sortBy, setSortBy] = useState<keyof DisplayPoll | null>(null);
     const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
-    const setSorting = (field: keyof RowData) => {
+    useEffect(() => {
+        getPolls()
+            .then(pollsData => setSortedPolls(pollsData))
+            .catch(error => console.error('Error fetching polls:', error));
+    }, [])
+
+    const setSorting = (field: keyof DisplayPoll) => {
         const reversed = field === sortBy ? !reverseSortDirection : false;
         setReverseSortDirection(reversed);
         setSortBy(field);
-        setSortedData(sortData(data, { sortBy: field, reversed, search }));
+        setSortedPolls(sortData(sortedPolls, { sortBy: field, reversed, search }));
     };
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.currentTarget;
         setSearch(value);
-        setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search: value }));
+        setSortedPolls(sortData(sortedPolls, { sortBy, reversed: reverseSortDirection, search: value }));
     };
 
-    const rows = sortedData.map((row) => (
-        <Table.Tr key={row.title}>
+    const rows = sortedPolls.map((row) => (
+        <Table.Tr key={row.id}>
+            <Table.Td>{row.id}</Table.Td>
             <Table.Td>{row.title}</Table.Td>
             <Table.Td>{row.creator}</Table.Td>
             <Table.Td>{row.link}</Table.Td>
@@ -79,6 +53,13 @@ export function PollsTable() {
             <Table horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed">
                 <Table.Tbody>
                     <Table.Tr>
+                        <Th
+                            sorted={sortBy === 'id'}
+                            reversed={reverseSortDirection}
+                            onSort={() => setSorting('id')}
+                        >
+                            id
+                        </Th>
                         <Th
                             sorted={sortBy === 'title'}
                             reversed={reverseSortDirection}
@@ -107,7 +88,7 @@ export function PollsTable() {
                         rows
                     ) : (
                         <Table.Tr>
-                            <Table.Td colSpan={Object.keys(data[0]).length}>
+                            <Table.Td colSpan={3}>
                                 <Text fw={500} ta="center">
                                     Nothing found
                                 </Text>

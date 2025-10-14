@@ -5,12 +5,11 @@ import { PollsTable } from "./PollsTable";
 
 export function Home() {
     const navigate = useNavigate();
+
     return (
         <div className="Home">
-
-            <PollsTable />
+            <PollsTable/>
             <Button onClick={() => navigate('/create')}>Create New Poll</Button>
-
         </div>
     );
 }

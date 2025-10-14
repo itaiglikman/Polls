@@ -1,30 +1,31 @@
 import { keys } from "@mantine/core";
-import type { RowData } from "../components/HomeArea/PollsTable";
+import type { DisplayPoll } from "./types";
 
-function filterData(data: RowData[], search: string) {
+function filterData(data: DisplayPoll[], search: string) {
     const query = search.toLowerCase().trim();
     return data.filter((item) =>
-        keys(data[0]).some((key) => item[key].toLowerCase().includes(query))
+        keys(data[0]).some((key) => key !== 'id' && item[key]?.toLowerCase().includes(query))
     );
 }
 
 export function sortData(
-    data: RowData[],
-    payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }
+    data: DisplayPoll[],
+    payload: { sortBy: keyof DisplayPoll | null; reversed: boolean; search: string }
 ) {
     const { sortBy } = payload;
 
-    if (!sortBy) {
+    if (!sortBy)
         return filterData(data, payload.search);
-    }
 
     return filterData(
         [...data].sort((a, b) => {
-            if (payload.reversed) {
-                return b[sortBy].localeCompare(a[sortBy]);
-            }
+            // no filtering by id and link
+            if (sortBy === 'id' || sortBy === 'link')
+                return 0; // Keep original order
 
-            return a[sortBy].localeCompare(b[sortBy]);
+            return payload.reversed
+                ? b[sortBy].localeCompare(a[sortBy])
+                : a[sortBy].localeCompare(b[sortBy]);
         }),
         payload.search
     );
