@@ -8,6 +8,11 @@ router.get('/:id', getPollById);
 router.get('/fullPoll/:id', getPollWithChoicesByPollId);
 // router.get('/fullPoll/:id', getPollWithVotesCount);
 
+// type NewPoll = {
+//     creator: string;
+//     title: string;
+//     choices: string[];
+// }
 router.post('/', createPoll);
 
 export default router;
