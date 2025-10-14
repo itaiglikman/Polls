@@ -9,10 +9,10 @@ async function getVotesByPollId(pollId: number): Promise<Vote[]> {
     return votes;
 }
 
-async function getVoteCountsByPollId(pollId: number): Promise<{ id: number, count: number }[]> {
+async function getVoteCountsByPollId(pollId: number): Promise<{ choiceId: number, count: number }[]> {
     const query = `
         SELECT 
-            choiceId as id,
+            choiceId,
             COUNT(*) as count
         FROM votes 
         WHERE pollId = ?
@@ -20,7 +20,7 @@ async function getVoteCountsByPollId(pollId: number): Promise<{ id: number, coun
         ORDER BY choiceId ASC
     `;
     const result = await sequelize.query(query, { replacements: [pollId], type: QueryTypes.SELECT });
-    return result as { id: number, count: number }[];
+    return result as { choiceId: number, count: number }[];
 }
 
 async function addVote(vote: Vote): Promise<void> {
